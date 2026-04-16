@@ -3,28 +3,24 @@
 AppName=NOMIX CLONER
 AppVersion=3.0.0
 AppPublisher=NOMIX Enterprise
-AppCopyright=Copyright (C) 2026 NOMIX
 DefaultDirName={autopf}\NOMIX CLONER
 DefaultGroupName=NOMIX CLONER
 OutputDir=Output
 OutputBaseFilename=NOMIX_V3_Installer
 
-; إعدادات الشكل والجماليات (الشياكة)
+; إعدادات الشكل والأمان
 WizardStyle=modern
 SetupIconFile=assets\icon.ico
-; الصور الجمالية (اختياري: لو عندك صور بانو للبرنامج)
-; WizardImageFile=assets\banner.bmp
-; WizardSmallImageFile=assets\logo_small.bmp
-
-; الصفحات الإضافية (الشروط والاتفاقيات)
-LicenseFile=assets\license.txt
-; صوره تظهر قبل التثبيت فيها تعليمات مثلاً
-; InfoBeforeFile=assets\readme.txt
-
-; الضغط والأمان
 Compression=lzma2
 SolidCompression=yes
 PrivilegesRequired=admin
+; تفعيل نافذة اختيار اللغة إجبارياً في بداية التسطيب
+ShowLanguageDialog=yes
+
+[Languages]
+; تعريف اللغات وربط كل لغة بملف الاتفاقية الخاص بها
+Name: "english"; MessagesFile: "compiler:Default.isl"; LicenseFile: "assets\license_en.txt"
+Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"; LicenseFile: "assets\license_ar.txt"
 
 [Files]
 ; الملفات الناتجة من Nuitka
