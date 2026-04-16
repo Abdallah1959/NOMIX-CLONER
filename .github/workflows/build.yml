@@ -1,4 +1,4 @@
-name: Build NOMIX Installer
+name: Build NOMIX Pro Installer
 
 on:
   push:
@@ -6,9 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -20,27 +19,25 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install nuitka
 
-      - name: Build Standalone Folder with Nuitka
+      - name: Build Standalone
         run: >
           python -m nuitka main.py
           --standalone
-          --assume-yes-for-downloads
-          --enable-plugin=anti-bloat
-          --windows-console-mode=force
           --windows-icon-from-ico=assets/icon.ico
+          --windows-console-mode=force
           --output-dir=build_output
+          --output-filename=NOMIX_CLONER.exe
 
-      - name: Compile Installer (Inno Setup)
+      - name: Compile Pro Installer
         uses: ayoolatobi/innosetup-action@v1.2.2
         with:
           filepath: setup.iss
 
-      - name: Upload Final Installer
+      - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:
-          name: NOMIX-V3-Installer
-          path: Output/*.exe
+          name: NOMIX-Pro-Installer
+          path: Output/NOMIX_V3_Installer.exe
