@@ -20,6 +20,13 @@ if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 init(autoreset=True)
 
+# === Fix Working Directory for EXE Builds ===
+if getattr(sys, 'frozen', False):
+    os.chdir(os.path.dirname(sys.executable))
+else:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# ============================================
+
 # === [ إجبار التيرمنال على دعم اللغة العربية (UTF-8) - تعديل المهندس ] ===
 if os.name == "nt":
     os.system("chcp 65001 > nul")
@@ -31,7 +38,7 @@ os.system(f'title NOMIX CLONER {Config.VERSION}')
 USER_TOKEN = None
 
 # === إعداد مسار حفظ آمن للبيانات في الويندوز ===
-APPDATA_DIR = os.path.join(os.getenv('APPDATA'), 'NOMIX')
+APPDATA_DIR = os.path.join(os.getenv('APPDATA') or os.getcwd(), 'NOMIX')
 os.makedirs(APPDATA_DIR, exist_ok=True)
 LICENSE_PATH = os.path.join(APPDATA_DIR, 'nomix_license.txt')
 # ================================================
@@ -42,23 +49,27 @@ LICENSE_PATH = os.path.join(APPDATA_DIR, 'nomix_license.txt')
 def getchecksum():
     md5_hash = hashlib.md5()
     try:
-        with open(''.join(sys.argv), "rb") as file:
-            md5_hash.update(file.read())
-        return md5_hash.hexdigest()
-    except Exception:
-        return "dummy_hash"
+        if getattr(sys, 'frozen', False):
+            file_path = sys.executable  # عند التشغيل كملف EXE
+        else:
+            file_path = os.path.abspath(__file__)  # أثناء التطوير
 
-try:
-    keyauthapp = api(
-        name = "NOMIX CLONER",
-        ownerid = "MYqhYydMIF",
-        version = "1.0",
-        hash_to_check = getchecksum()
-    )
-except Exception as e:
-    print(f"KeyAuth Connection Error: {e}")
-    time.sleep(3)
-    sys.exit()
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                md5_hash.update(chunk)
+
+        return md5_hash.hexdigest()
+    except Exception as e:
+        print(f"Checksum Error: {e}")
+        return "checksum_error"
+
+# تعريف تطبيق KeyAuth
+keyauthapp = api(
+    name="NOMIX CLONER",
+    ownerid="MYqhYydMIF",
+    version="1.0.0",
+    hash_to_check=getchecksum()
+)
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -66,7 +77,7 @@ def clear_screen():
 def check_for_updates(auto_check=False):
     """دالة للتحقق من أحدث إصدار على جيت هاب"""
     current_version = Config.VERSION # المفروض تكون مثلاً "1.0.0"
-    repo_url = "https://api.github.com/repos/Abdallah1959/NOMIX-CLONER/releases/latest"
+    repo_url = f"https://api.github.com/repos/{Config.GITHUB_REPO}/releases/latest"
     
     try:
         response = requests.get(repo_url, timeout=5)
@@ -177,14 +188,11 @@ async def async_get_guild_text_channels(token, guild_id):
 
 def run_async(coro):
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_closed():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        return asyncio.run(coro)
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-    return loop.run_until_complete(coro)
+        return loop.run_until_complete(coro)
 
 def show_token_guide():
     clear_screen()
@@ -249,7 +257,7 @@ def keyauth_login():
             keyauthapp.license(saved_key)
             Logger.add("Saved License Valid! Auto-Login successful.")
             time.sleep(1.5)
-            start_security_thread() # استدعاء الدالة النظيفة
+            start_security_thread() 
             return True
         except SystemExit:
             if os.path.exists(key_file): os.remove(key_file)
@@ -280,7 +288,7 @@ def keyauth_login():
                 with open(key_file, "w") as f:
                     f.write(key)
                 time.sleep(1.5)
-                start_security_thread() # استدعاء الدالة النظيفة
+                start_security_thread() 
                 return True
             except SystemExit:
                 Logger.error("Activation Failed: Invalid, Expired, or Banned Key.")
@@ -335,8 +343,8 @@ def verify_security_status():
         print_centered_text(f"{Fore.RED}[!] SECURITY ALERT: Your license has been banned or expired.{Style.RESET_ALL}")
         print_centered_text(f"{Fore.RED}[!] Force closing application...{Style.RESET_ALL}")
         
-        if os.path.exists("nomix_license.txt"):
-            os.remove("nomix_license.txt")
+        if os.path.exists(LICENSE_PATH):
+            os.remove(LICENSE_PATH)
             
         time.sleep(3)
         os._exit(1) 
@@ -386,7 +394,7 @@ def main_menu():
                 open_browser = print_centered_input_prompt("[?] Open download page in browser? (Y/N) > ").strip().lower()
                 if open_browser == 'y':
                     import webbrowser
-                    webbrowser.open("https://github.com/Abdallah1959/NOMIX-CLONER/releases/latest")
+                    webbrowser.open(f"https://github.com/{Config.GITHUB_REPO}/releases/latest")
                     print_centered_text(f"{Fore.YELLOW}[*] Opening browser... Please download and install the new version.{Style.RESET_ALL}")
                     time.sleep(2)
             
@@ -990,7 +998,15 @@ def exit_system():
             print_centered_text(f"{Fore.RED}[-] Invalid input.{Style.RESET_ALL}")
 
 if __name__ == "__main__":
-    if keyauth_login():
-        system_login()
-    else:
-        sys.exit()
+    try:
+        if keyauth_login():
+            system_login()
+        else:
+            sys.exit()
+    except Exception as e:
+        import traceback
+        with open("error.log", "w", encoding="utf-8") as f:
+            f.write(traceback.format_exc())
+        print("\nAn unexpected error occurred.")
+        print("Check 'error.log' for more details.")
+        input("\nPress Enter to exit...")
