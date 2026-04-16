@@ -3,45 +3,80 @@ name: Build NOMIX Pro Installer
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'   # يتم إنشاء الإصدار عند رفع Tag مثل v3.0.0
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
+
     permissions:
       contents: write
 
     steps:
+      # سحب الكود من المستودع
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # إعداد بايثون
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # تثبيت الاعتماديات
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install nuitka
 
+      # التحقق من وجود الأيقونة
+      - name: Verify Icon Exists
+        shell: pwsh
+        run: |
+          if (!(Test-Path "assets/NOMIXCLONER.ico")) {
+            Write-Error "Icon file not found: assets/NOMIXCLONER.ico"
+            exit 1
+          }
+
+      # بناء الملف التنفيذي باستخدام Nuitka
       - name: Build Standalone with Nuitka
-        run: python -m nuitka main.py --standalone --assume-yes-for-downloads --windows-icon-from-ico=assets/icon.ico --windows-console-mode=force --enable-plugin=anti-bloat --output-dir=build_output --output-filename=NOMIX_CLONER.exe
+        run: >
+          python -m nuitka main.py
+          --standalone
+          --assume-yes-for-downloads
+          --windows-icon-from-ico=assets/NOMIXCLONER.ico
+          --windows-console-mode=force
+          --enable-plugin=anti-bloat
+          --output-dir=build_output
+          --output-filename=NOMIX_CLONER.exe
 
+      # التحقق من وجود Inno Setup
+      - name: Verify Inno Setup Installation
+        shell: pwsh
+        run: |
+          if (!(Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe")) {
+            Write-Error "Inno Setup is not installed."
+            exit 1
+          }
+
+      # إنشاء ملف التثبيت
       - name: Compile Installer with Inno Setup
-  shell: pwsh
-  run: |
-    & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "setup.iss"
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "setup.iss"
 
+      # رفع المثبّت كـ Artifact
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NOMIX-Pro-Installer
-          path: Output\NOMIX_V3_Installer.exe
+          path: Output/NOMIX_V3_Installer.exe
 
+      # إنشاء إصدار رسمي على GitHub
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: Output/NOMIX_V3_Installer.exe
