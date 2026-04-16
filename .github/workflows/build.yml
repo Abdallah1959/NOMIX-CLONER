@@ -21,28 +21,17 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Upgrade pip and Install Dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install nuitka
 
       - name: Build Standalone with Nuitka
-        shell: pwsh
-        run: |
-          python -m nuitka main.py `
-            --standalone `
-            --assume-yes-for-downloads `
-            --windows-icon-from-ico=assets/icon.ico `
-            --windows-console-mode=force `
-            --enable-plugin=anti-bloat `
-            --output-dir=build_output `
-            --output-filename=NOMIX_CLONER.exe
+        run: python -m nuitka main.py --standalone --assume-yes-for-downloads --windows-icon-from-ico=assets/icon.ico --windows-console-mode=force --enable-plugin=anti-bloat --output-dir=build_output --output-filename=NOMIX_CLONER.exe
 
       - name: Compile Installer with Inno Setup
-        shell: cmd
-        run: |
-          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss'
 
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
@@ -50,7 +39,7 @@ jobs:
           name: NOMIX-Pro-Installer
           path: Output\NOMIX_V3_Installer.exe
 
-      - name: Create GitHub Release and Upload Installer
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: Output/NOMIX_V3_Installer.exe
