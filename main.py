@@ -84,7 +84,7 @@ def getchecksum():
 keyauthapp = api(
     name="NOMIX CLONER",
     ownerid="MYqhYydMIF",
-    version="1.0", # ⚠️ لازم تتأكد إن الرقم ده هو اللي موجود في الموقع بالظبط
+    version="1.0.0", # ⚠️ لازم تتأكد إن الرقم ده هو اللي موجود في الموقع بالظبط
     hash_to_check=getchecksum()
 )
 
