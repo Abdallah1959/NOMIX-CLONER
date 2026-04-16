@@ -10,6 +10,8 @@ import requests
 import threading
 import hashlib
 import traceback
+import tkinter as tk
+from tkinter import filedialog
 from datetime import datetime
 from colorama import Fore, Style, init
 from keyauth import api
@@ -698,6 +700,39 @@ def scraper_mode():
                 indices = [int(x.strip())-1 for x in selected.split(',') if x.strip().isdigit()]
                 for idx in indices:
                     if 0 <= idx < len(channels_data): channels_to_scrape.append(channels_data[idx])
+
+            print_centered_text("\n[*] Please select a folder to save your backups...")
+            time.sleep(1)
+            
+            # --- فتح نافذة الويندوز لاختيار الفولدر ---
+            root = tk.Tk()
+            root.withdraw()  # إخفاء النافذة الرئيسية
+            root.attributes('-topmost', True) # إجبار النافذة تظهر فوق الـ CMD
+            save_dir = filedialog.askdirectory(title="Select Folder to Save NOMIX Backups")
+            root.destroy()
+            
+            if not save_dir:
+                print_centered_text(f"{Fore.RED}[-] Backup Cancelled. No folder selected.{Style.RESET_ALL}")
+                time.sleep(2)
+                return main_menu()
+                
+            print_centered_text(f"[*] Backups will be saved to: {Fore.CYAN}{save_dir}{Style.RESET_ALL}")
+            # ----------------------------------------
+            
+            print_centered_text("\n[*] Initializing Async Embed Scraper...")
+            success_count = 0
+            
+            async def run_scraper():
+                count = 0
+                for ch in channels_to_scrape:
+                    print_centered_text(f"[*] Fetching messages from #{ch['name']}...")
+                    # ضفنا save_dir هنا عشان نبعته للدالة
+                    saved_path = await scrape_messages_async(USER_TOKEN, server_name, ch['id'], ch['name'], limit_num, format_type, save_dir)
+                    if saved_path:
+                        Logger.add(f"Saved: {saved_path}")
+                        count += 1
+                        await asyncio.sleep(0.5)
+                return count
             
             print_centered_text("\n[*] Initializing Async Embed Scraper...")
             success_count = 0
@@ -745,7 +780,8 @@ def clean_carlbot_embed(embed):
 
     return cleaned
 
-async def scrape_messages_async(token, server_name, channel_id, channel_name, limit, format_type):
+# ضفنا save_dir في القوسين
+async def scrape_messages_async(token, server_name, channel_id, channel_name, limit, format_type, save_dir):
     headers = {"Authorization": str(token)}
     async with aiohttp.ClientSession() as session:
         async with session.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit={limit}", headers=headers) as res:
@@ -759,8 +795,10 @@ async def scrape_messages_async(token, server_name, channel_id, channel_name, li
                 if format_type in ['txt', 'html']:
                     messages = messages[::-1] 
                     
-                folder_path = os.path.join("Cloned_Messages", server_name)
+                # التعديل هنا: استخدام المسار اللي اختاره العميل
+                folder_path = os.path.join(save_dir, server_name)
                 os.makedirs(folder_path, exist_ok=True)
+                # بقية الكود زي ما هو ...
                 safe_name = "".join(x for x in channel_name if x.isalnum() or x in " -_")
                 
                 if format_type == 'json':
@@ -1015,9 +1053,7 @@ if __name__ == "__main__":
         else:
             sys.exit()
     except Exception as e:
-        import traceback
-        with open("error.log", "w", encoding="utf-8") as f:
-            f.write(traceback.format_exc())
+        log_error(e) # الدالة دي إحنا مجهزينها فوق بتحفظ في مسار آمن
         print("\nAn unexpected error occurred.")
-        print("Check 'error.log' for more details.")
+        print("Check 'error.log' in AppData/NOMIX for details.")
         input("\nPress Enter to exit...")
