@@ -21,7 +21,7 @@ Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
 Name: "desktopicon"; Description: "Create a desktop shortcut"; Flags: unchecked
 
 [Files]
-Source: "build_output\NOMIX_CLONER.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "build_output\main.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\NOMIX CLONER"; Filename: "{app}\NOMIX_CLONER.exe"
