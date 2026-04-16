@@ -23,7 +23,12 @@ Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"; LicenseFile: "ass
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
 
 [Files]
+; ملفات البرنامج
 Source: "build_output\main.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; تضمين ملفات الترخيص داخل المثبّت
+Source: "assets\license_en.txt"; Flags: dontcopy
+Source: "assets\license_ar.txt"; Flags: dontcopy
 
 [Icons]
 Name: "{group}\NOMIX CLONER"; Filename: "{app}\NOMIX_CLONER.exe"
