@@ -215,9 +215,9 @@ def background_security_patrol(interval=10):
             print(f"║ [!] Error Caught: {e}                                        ║")
             print(f"╚══════════════════════════════════════════════════════════════╝{Style.RESET_ALL}\n")
             
-            if os.path.exists("nomix_license.txt"):
+            if os.path.exists(LICENSE_PATH):
                 try:
-                    os.remove("nomix_license.txt")
+                    os.remove(LICENSE_PATH)
                 except:
                     pass
             
