@@ -36,7 +36,7 @@ jobs:
         shell: pwsh
         run: |
           if (!(Test-Path "assets/NOMIXCLONER.ico")) {
-            Write-Error "Icon file not found: assets/NOMIXCLONER.ico"
+            Write-Error "Icon file not found: assets/icon.ico"
             exit 1
           }
 
