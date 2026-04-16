@@ -41,17 +41,22 @@ jobs:
 
       # بناء الملف التنفيذي باستخدام Nuitka
       - name: Build Standalone with Nuitka
-        shell: pwsh
-        run: |
-          python -m nuitka main.py `
-            --standalone `
-            --assume-yes-for-downloads `
-            --windows-icon-from-ico=assets/NOMIXCLONER.ico `
-            --windows-console-mode=force `
-            --enable-plugin=anti-bloat `
-            --output-dir=build_output `
-            --output-filename=NOMIX_CLONER.exe
-
+  shell: pwsh
+  run: |
+    python -m nuitka main.py `
+      --standalone `
+      --assume-yes-for-downloads `
+      --enable-plugin=anti-bloat `
+      --windows-console-mode=force `
+      --windows-icon-from-ico=assets/NOMIXCLONER.ico `
+      --include-package=aiohttp `
+      --include-package=discord `
+      --include-package=requests `
+      --include-package=colorama `
+      --include-package=dotenv `
+      --include-package=keyauth `
+      --output-dir=build_output `
+      --output-filename=NOMIX_CLONER.exe
       # عرض مخرجات البناء للتأكد
       - name: Debug Build Output
         shell: pwsh
