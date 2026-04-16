@@ -30,6 +30,12 @@ os.system(f'title NOMIX CLONER {Config.VERSION}')
 
 USER_TOKEN = None
 
+# === إعداد مسار حفظ آمن للبيانات في الويندوز ===
+APPDATA_DIR = os.path.join(os.getenv('APPDATA'), 'NOMIX')
+os.makedirs(APPDATA_DIR, exist_ok=True)
+LICENSE_PATH = os.path.join(APPDATA_DIR, 'nomix_license.txt')
+# ================================================
+
 # =========================================================
 # KeyAuth Security System
 # =========================================================
