@@ -734,20 +734,6 @@ def scraper_mode():
                         await asyncio.sleep(0.5)
                 return count
             
-            print_centered_text("\n[*] Initializing Async Embed Scraper...")
-            success_count = 0
-            
-            async def run_scraper():
-                count = 0
-                for ch in channels_to_scrape:
-                    print_centered_text(f"[*] Fetching messages from #{ch['name']}...")
-                    saved_path = await scrape_messages_async(USER_TOKEN, server_name, ch['id'], ch['name'], limit_num, format_type)
-                    if saved_path:
-                        Logger.add(f"Saved: {saved_path}")
-                        count += 1
-                        await asyncio.sleep(0.5)
-                return count
-
             success_count = run_async(run_scraper())
             
             if success_count > 0:
