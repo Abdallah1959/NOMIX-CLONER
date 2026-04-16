@@ -2,7 +2,6 @@
 AppName=NOMIX CLONER
 AppVersion=3.0.0
 AppPublisher=NOMIX Enterprise
-AppCopyright=Copyright (C) 2026 NOMIX
 DefaultDirName={autopf}\NOMIX CLONER
 DefaultGroupName=NOMIX CLONER
 OutputDir=Output
@@ -11,7 +10,7 @@ Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
-SetupIconFile=assets\icon.ico
+SetupIconFile=assets\NOMIXCLONER.ico
 UninstallDisplayIcon={app}\NOMIX_CLONER.exe
 
 [Languages]
