@@ -29,17 +29,19 @@ jobs:
           pip install nuitka
 
       - name: Build Standalone with Nuitka
+        shell: pwsh
         run: |
-          python -m nuitka main.py ^
-            --standalone ^
-            --assume-yes-for-downloads ^
-            --windows-icon-from-ico=assets/icon.ico ^
-            --windows-console-mode=force ^
-            --enable-plugin=anti-bloat ^
-            --output-dir=build_output ^
+          python -m nuitka main.py `
+            --standalone `
+            --assume-yes-for-downloads `
+            --windows-icon-from-ico=assets/icon.ico `
+            --windows-console-mode=force `
+            --enable-plugin=anti-bloat `
+            --output-dir=build_output `
             --output-filename=NOMIX_CLONER.exe
 
       - name: Compile Installer with Inno Setup
+        shell: cmd
         run: |
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
 
