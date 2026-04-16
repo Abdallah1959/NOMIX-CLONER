@@ -234,7 +234,7 @@ def start_security_thread():
 # ---------------------------------------
 
 def keyauth_login():
-    key_file = "nomix_license.txt"
+    key_file = LICENSE_PATH
 
     # 1. الدخول التلقائي لو في مفتاح متسجل
     if os.path.exists(key_file):
