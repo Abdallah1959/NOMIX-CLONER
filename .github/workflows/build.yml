@@ -1,4 +1,4 @@
-name: Build NOMIX EXE
+name: Build NOMIX Installer
 
 on:
   push:
@@ -24,23 +24,23 @@ jobs:
           pip install -r requirements.txt
           pip install nuitka
 
-      - name: Build with Nuitka (Enterprise Settings)
+      - name: Build Standalone Folder with Nuitka
         run: >
           python -m nuitka main.py
           --standalone
-          --onefile
           --assume-yes-for-downloads
           --enable-plugin=anti-bloat
           --windows-console-mode=force
-          --output-filename=NOMIX_CLONER.exe
-          --company-name="NOMIX"
-          --product-name="NOMIX CLONER"
-          --file-version="3.0.0"
-          --product-version="3.0.0"
-          --file-description="Enterprise Discord Automation Tool"
+          --windows-icon-from-ico=assets/icon.ico
+          --output-dir=build_output
 
-      - name: Upload Final EXE
+      - name: Compile Installer (Inno Setup)
+        uses: ayoolatobi/innosetup-action@v1.2.2
+        with:
+          filepath: setup.iss
+
+      - name: Upload Final Installer
         uses: actions/upload-artifact@v4
         with:
-          name: NOMIX-CLONER-Windows
-          path: NOMIX_CLONER.exe
+          name: NOMIX-V3-Installer
+          path: Output/*.exe
