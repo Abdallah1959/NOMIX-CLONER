@@ -48,6 +48,7 @@ jobs:
             --assume-yes-for-downloads `
             --enable-plugin=anti-bloat `
             --windows-console-mode=force `
+            --enable-plugin=tk-inter `
             --windows-icon-from-ico=assets/NOMIXCLONER.ico `
             --include-package=aiohttp `
             --include-package=discord `
