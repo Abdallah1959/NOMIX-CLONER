@@ -13,20 +13,24 @@ jobs:
       contents: write
 
     steps:
+      # سحب الكود
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # إعداد بايثون
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # تثبيت الاعتماديات
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install nuitka
 
+      # التحقق من وجود الأيقونة
       - name: Verify Icon Exists
         shell: pwsh
         run: |
@@ -35,6 +39,7 @@ jobs:
             exit 1
           }
 
+      # بناء الملف التنفيذي باستخدام Nuitka
       - name: Build Standalone with Nuitka
         shell: pwsh
         run: |
@@ -47,29 +52,52 @@ jobs:
             --output-dir=build_output `
             --output-filename=NOMIX_CLONER.exe
 
+      # عرض مخرجات البناء للتأكد
       - name: Debug Build Output
         shell: pwsh
         run: |
           Get-ChildItem -Recurse build_output
 
+      # التحقق من وجود Inno Setup
+      - name: Verify Inno Setup Installation
+        shell: pwsh
+        run: |
+          if (!(Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe")) {
+            Write-Error "Inno Setup is not installed."
+            exit 1
+          }
+
+      # إنشاء ملف التثبيت
       - name: Compile Installer with Inno Setup
         shell: pwsh
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "setup.iss"
 
+      # التحقق من وجود ملف التثبيت
+      - name: Verify Installer Exists
+        shell: pwsh
+        run: |
+          if (!(Test-Path "Output/NOMIX_CLONER_V1_Installer.exe")) {
+            Write-Error "Installer not found!"
+            Get-ChildItem -Recurse Output
+            exit 1
+          }
+
+      # رفع المثبت كـ Artifact
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NOMIX-Pro-Installer
           path: Output/NOMIX_CLONER_V1_Installer.exe
 
+      # إنشاء إصدار رسمي على GitHub
       - name: Create GitHub Release
-  if: startsWith(github.ref, 'refs/tags/')
-  uses: softprops/action-gh-release@v2
-  with:
-    files: Output/NOMIX_CLONER_V1_Installer.exe
-    name: NOMIX CLONER ${{ github.ref_name }}
-    tag_name: ${{ github.ref_name }}
-    generate_release_notes: true
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Output/NOMIX_CLONER_V1_Installer.exe
+          name: NOMIX CLONER ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
