@@ -6,6 +6,7 @@ import asyncio
 import aiohttp
 import discord
 import json
+import requests
 import threading
 import hashlib
 from colorama import Fore, Style, init
@@ -55,6 +56,37 @@ except Exception as e:
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def check_for_updates(auto_check=False):
+    """دالة للتحقق من أحدث إصدار على جيت هاب"""
+    current_version = Config.VERSION # المفروض تكون مثلاً "3.0.0"
+    repo_url = "https://api.github.com/repos/Abdallah1959/NOMIX-CLONER/releases/latest"
+    
+    try:
+        response = requests.get(repo_url, timeout=5)
+        if response.status_code == 200:
+            latest_version = response.json()['tag_name'] # بتجيب اسم التاج (مثلاً v3.0.0)
+            
+            # بنشيل حرف v لو موجود عشان نقارن الأرقام
+            clean_latest = latest_version.replace('v', '')
+            clean_current = current_version.replace('v', '')
+            
+            if clean_latest != clean_current:
+                if auto_check:
+                    print_centered_text(f"\n{Fore.YELLOW}[!] NEW UPDATE AVAILABLE: v{clean_latest} !{Style.RESET_ALL}")
+                    print_centered_text(f"{Fore.YELLOW}[!] Please select option [5] from the menu to update.{Style.RESET_ALL}")
+                    time.sleep(3)
+                return clean_latest
+            else:
+                if not auto_check:
+                    print_centered_text(f"\n{Fore.GREEN}[✔] You are using the latest version (v{clean_current}).{Style.RESET_ALL}")
+                    time.sleep(2)
+                return False
+    except Exception as e:
+        if not auto_check:
+            print_centered_text(f"\n{Fore.RED}[-] Failed to check for updates. Check your internet.{Style.RESET_ALL}")
+            time.sleep(2)
+        return False
 
 def get_terminal_width():
     return shutil.get_terminal_size((100, 20)).columns
@@ -280,6 +312,8 @@ def system_login():
         is_valid = run_async(async_check_token(token))
         if is_valid:
             Logger.add("Access Granted! Logging in...")
+            # فحص التحديثات التلقائي عند الدخول
+            check_for_updates(auto_check=True)
             time.sleep(1)
             USER_TOKEN = token
             main_menu()
