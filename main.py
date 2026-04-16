@@ -65,10 +65,11 @@ def log_error(error):
 def getchecksum():
     md5_hash = hashlib.md5()
     try:
-        if getattr(sys, 'frozen', False):
-            file_path = sys.executable  # عند التشغيل كملف EXE
+        # التعديل السحري المتوافق مع Nuitka
+        if "__compiled__" in globals() or getattr(sys, 'frozen', False):
+            file_path = os.path.abspath(sys.argv[0])  # بيقرأ ملف الـ EXE نفسه
         else:
-            file_path = os.path.abspath(__file__)  # أثناء التطوير
+            file_path = os.path.abspath(__file__)
 
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
@@ -83,7 +84,7 @@ def getchecksum():
 keyauthapp = api(
     name="NOMIX CLONER",
     ownerid="MYqhYydMIF",
-    version="1.0.0",
+    version="1.0", # ⚠️ لازم تتأكد إن الرقم ده هو اللي موجود في الموقع بالظبط
     hash_to_check=getchecksum()
 )
 
