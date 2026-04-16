@@ -65,13 +65,13 @@ def clear_screen():
 
 def check_for_updates(auto_check=False):
     """دالة للتحقق من أحدث إصدار على جيت هاب"""
-    current_version = Config.VERSION # المفروض تكون مثلاً "3.0.0"
+    current_version = Config.VERSION # المفروض تكون مثلاً "1.0.0"
     repo_url = "https://api.github.com/repos/Abdallah1959/NOMIX-CLONER/releases/latest"
     
     try:
         response = requests.get(repo_url, timeout=5)
         if response.status_code == 200:
-            latest_version = response.json()['tag_name'] # بتجيب اسم التاج (مثلاً v3.0.0)
+            latest_version = response.json()['tag_name'] # بتجيب اسم التاج (مثلاً v1.0.0)
             
             # بنشيل حرف v لو موجود عشان نقارن الأرقام
             clean_latest = latest_version.replace('v', '')
