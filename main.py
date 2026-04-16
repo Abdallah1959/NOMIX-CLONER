@@ -369,10 +369,21 @@ def main_menu():
             main_menu()
             break
         elif choice == '5':
-            print_centered_text("\n[*] Checking GitHub for updates...")
-            time.sleep(2)
-            print_centered_text("[✔] You are on the latest version!")
-            time.sleep(2)
+            clear_screen()
+            draw_logo()
+            print_centered_text("[*] Checking GitHub for the latest version...")
+            time.sleep(1)
+            
+            latest = check_for_updates(auto_check=False)
+            if latest:
+                print_centered_text(f"\n{Fore.GREEN}[!] Update v{latest} is available!{Style.RESET_ALL}")
+                open_browser = print_centered_input_prompt("[?] Open download page in browser? (Y/N) > ").strip().lower()
+                if open_browser == 'y':
+                    import webbrowser
+                    webbrowser.open("https://github.com/Abdallah1959/NOMIX-CLONER/releases/latest")
+                    print_centered_text(f"{Fore.YELLOW}[*] Opening browser... Please download and install the new version.{Style.RESET_ALL}")
+                    time.sleep(2)
+            
             main_menu()
             break
         elif choice == '6':
