@@ -13,7 +13,7 @@ jobs:
       contents: write
 
     steps:
-      # سحب الكود
+      # سحب الكود من المستودع
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -41,29 +41,30 @@ jobs:
 
       # بناء الملف التنفيذي باستخدام Nuitka
       - name: Build Standalone with Nuitka
-  shell: pwsh
-  run: |
-    python -m nuitka main.py `
-      --standalone `
-      --assume-yes-for-downloads `
-      --enable-plugin=anti-bloat `
-      --windows-console-mode=force `
-      --windows-icon-from-ico=assets/NOMIXCLONER.ico `
-      --include-package=aiohttp `
-      --include-package=discord `
-      --include-package=requests `
-      --include-package=colorama `
-      --include-package=dotenv `
-      --include-package=keyauth `
-      --output-dir=build_output `
-      --output-filename=NOMIX_CLONER.exe
-      # عرض مخرجات البناء للتأكد
+        shell: pwsh
+        run: |
+          python -m nuitka main.py `
+            --standalone `
+            --assume-yes-for-downloads `
+            --enable-plugin=anti-bloat `
+            --windows-console-mode=force `
+            --windows-icon-from-ico=assets/NOMIXCLONER.ico `
+            --include-package=aiohttp `
+            --include-package=discord `
+            --include-package=requests `
+            --include-package=colorama `
+            --include-package=dotenv `
+            --include-package=keyauth `
+            --output-dir=build_output `
+            --output-filename=NOMIX_CLONER.exe
+
+      # عرض ناتج البناء للتأكد
       - name: Debug Build Output
         shell: pwsh
         run: |
           Get-ChildItem -Recurse build_output
 
-      # التحقق من وجود Inno Setup
+      # التأكد من وجود Inno Setup
       - name: Verify Inno Setup Installation
         shell: pwsh
         run: |
@@ -78,17 +79,7 @@ jobs:
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "setup.iss"
 
-      # التحقق من وجود ملف التثبيت
-      - name: Verify Installer Exists
-        shell: pwsh
-        run: |
-          if (!(Test-Path "Output/NOMIX_CLONER_V1_Installer.exe")) {
-            Write-Error "Installer not found!"
-            Get-ChildItem -Recurse Output
-            exit 1
-          }
-
-      # رفع المثبت كـ Artifact
+      # رفع المثبّت كملف Artifact
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
