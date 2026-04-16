@@ -1,6 +1,6 @@
 [Setup]
 AppName=NOMIX CLONER
-AppVersion=3.0.0
+AppVersion=1.0.0
 AppPublisher=NOMIX Enterprise
 AppCopyright=Copyright (C) 2026 NOMIX Enterprise
 DefaultDirName={autopf}\NOMIX CLONER
@@ -15,19 +15,21 @@ SetupIconFile=assets\NOMIXCLONER.ico
 UninstallDisplayIcon={app}\NOMIX_CLONER.exe
 ShowLanguageDialog=yes
 
+; تحديد ملف الترخيص (سيتم تغييره ديناميكياً حسب اللغة)
+LicenseFile={tmp}\license_en.txt
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "arabic"; MessagesFile: "compiler:Languages\Arabic.isl"
-
-[CustomMessages]
-english.LicenseFile=assets\license_en.txt
-arabic.LicenseFile=assets\license_ar.txt
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
 
 [Files]
+; ملفات البرنامج
 Source: "build_output\main.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; ملفات الترخيص - سيتم تضمينها داخل المثبّت
 Source: "assets\license_en.txt"; Flags: dontcopy
 Source: "assets\license_ar.txt"; Flags: dontcopy
 
@@ -42,8 +44,18 @@ Filename: "{app}\NOMIX_CLONER.exe"; Description: "{cm:LaunchProgram,NOMIX CLONER
 [Code]
 procedure InitializeWizard;
 var
-  LicensePath: string;
+  LicenseFilePath: string;
 begin
-  LicensePath := ExpandConstant('{cm:LicenseFile}');
-  WizardForm.LicenseMemo.Lines.LoadFromFile(ExpandConstant('{src}\' + LicensePath));
+  { استخراج ملفات الترخيص من داخل المثبّت }
+  ExtractTemporaryFile('license_en.txt');
+  ExtractTemporaryFile('license_ar.txt');
+
+  { اختيار ملف الترخيص بناءً على اللغة }
+  if ActiveLanguage = 'arabic' then
+    LicenseFilePath := ExpandConstant('{tmp}\license_ar.txt')
+  else
+    LicenseFilePath := ExpandConstant('{tmp}\license_en.txt');
+
+  { تحميل نص الاتفاقية }
+  WizardForm.LicenseMemo.Lines.LoadFromFile(LicenseFilePath);
 end;
