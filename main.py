@@ -9,6 +9,8 @@ import json
 import requests
 import threading
 import hashlib
+import traceback
+from datetime import datetime
 from colorama import Fore, Style, init
 from keyauth import api
 
@@ -41,6 +43,20 @@ USER_TOKEN = None
 APPDATA_DIR = os.path.join(os.getenv('APPDATA') or os.getcwd(), 'NOMIX')
 os.makedirs(APPDATA_DIR, exist_ok=True)
 LICENSE_PATH = os.path.join(APPDATA_DIR, 'nomix_license.txt')
+# ================================================
+
+# === نظام تسجيل الأخطاء الدقيق (Crash Logger) ===
+def log_error(error):
+    """تسجيل الأخطاء في ملف error.log داخل مسار آمن"""
+    try:
+        log_file_path = os.path.join(APPDATA_DIR, "error.log")
+        with open(log_file_path, "a", encoding="utf-8") as f:
+            f.write("\n" + "=" * 60 + "\n")
+            f.write(f"Date: {datetime.now()}\n")
+            f.write(f"Error: {str(error)}\n\n")
+            f.write(traceback.format_exc())
+    except Exception:
+        pass
 # ================================================
 
 # =========================================================
@@ -76,15 +92,14 @@ def clear_screen():
 
 def check_for_updates(auto_check=False):
     """دالة للتحقق من أحدث إصدار على جيت هاب"""
-    current_version = Config.VERSION # المفروض تكون مثلاً "1.0.0"
+    current_version = Config.VERSION 
     repo_url = f"https://api.github.com/repos/{Config.GITHUB_REPO}/releases/latest"
     
     try:
         response = requests.get(repo_url, timeout=5)
         if response.status_code == 200:
-            latest_version = response.json()['tag_name'] # بتجيب اسم التاج (مثلاً v1.0.0)
+            latest_version = response.json()['tag_name'] 
             
-            # بنشيل حرف v لو موجود عشان نقارن الأرقام
             clean_latest = latest_version.replace('v', '')
             clean_current = current_version.replace('v', '')
             
@@ -161,7 +176,7 @@ def print_centered_text(text):
     print(f"{pad_str}{text}")
 
 # ==========================================
-# Async API Helpers (Replacing Requests)
+# Async API Helpers
 # ==========================================
 async def async_check_token(token):
     headers = {'Authorization': str(token)}
@@ -210,7 +225,7 @@ def show_token_guide():
     draw_fixed_box("HOW TO GET YOUR TOKEN", guide_lines)
     print("")
 
-# --- [ تعديل المهندس للحارس المخفي ] ---
+# --- [ الحارس المخفي ] ---
 def background_security_patrol(interval=10):
     while True:
         time.sleep(interval)
@@ -244,7 +259,6 @@ def start_security_thread():
 def keyauth_login():
     key_file = LICENSE_PATH
 
-    # 1. الدخول التلقائي لو في مفتاح متسجل
     if os.path.exists(key_file):
         with open(key_file, "r") as f:
             saved_key = f.read().strip()
@@ -264,7 +278,6 @@ def keyauth_login():
         except Exception:
             if os.path.exists(key_file): os.remove(key_file)
 
-    # 2. القائمة الرئيسية للترحيب (Welcome Menu)
     while True:
         clear_screen()
         draw_logo()
@@ -326,7 +339,6 @@ def system_login():
         is_valid = run_async(async_check_token(token))
         if is_valid:
             Logger.add("Access Granted! Logging in...")
-            # فحص التحديثات التلقائي عند الدخول
             check_for_updates(auto_check=True)
             time.sleep(1)
             USER_TOKEN = token
@@ -711,7 +723,6 @@ def scraper_mode():
             if again == 'y': continue 
             else: return main_menu() 
 
-# --- [ دالة المهندس الاحترافية لفلترة كارل بوت ] ---
 def clean_carlbot_embed(embed):
     allowed_keys = {
         "title", "description", "url", "color",
@@ -732,7 +743,6 @@ def clean_carlbot_embed(embed):
         ]
 
     return cleaned
-# --------------------------------------------------
 
 async def scrape_messages_async(token, server_name, channel_id, channel_name, limit, format_type):
     headers = {"Authorization": str(token)}
