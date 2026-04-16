@@ -61,13 +61,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: NOMIX-Pro-Installer
-          path: Output/NOMIX_V3_Installer.exe
+          path: Output/NOMIX_V1_Installer.exe
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: Output/NOMIX_V3_Installer.exe
+          files: Output/NOMIX_V1_Installer.exe
           name: NOMIX CLONER ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
